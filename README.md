@@ -10,7 +10,7 @@ The MLOps Zoomcamp course covers practical aspects of productionizing machine le
 
 ## Contents
 1. [Introduction](01-intro)
-2. [Experiment Tracking](02-experiment-tracking)
+2. [Experiment Tracking](02-exp-tracking)
 3. [Orchestration](03-orchestration)
 4. [Deployment](04-deployment)
 5. [Monitoring](05-monitoring)
