@@ -1,0 +1,34 @@
+services:
+  mage:
+    image: mlops_zoommcamp_homework_3:latest
+    command: mage start ${PROJECT_NAME}
+    env_file:
+     - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PROJECT_NAME: homework_3
+      USER_CODE_PATH: /home/src/${PROJECT_NAME}
+      ENV: ${ENV:-development}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    ports:
+      - 6789:6789
+    volumes:
+      - .:/home/src/
+    restart: on-failure:5
+    networks:
+      - app-network
+  mlflow:
+    build:
+      context: .
+      dockerfile: mlflow.Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - "${PWD}/mlflow:/home/mlflow/"
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
