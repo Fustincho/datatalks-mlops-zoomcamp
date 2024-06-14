@@ -1,0 +1,14 @@
+services:
+  mage:
+    image: mlops_zoommcamp_homework_4_bonus:latest
+    command: mage start mage_project
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      USER_CODE_PATH: /home/src/mage_project
+    ports:
+      - 6789:6789
+    volumes:
+      - .:/home/src/
+    restart: on-failure:5
