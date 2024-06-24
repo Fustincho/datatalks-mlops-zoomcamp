@@ -1,0 +1,40 @@
+services:
+  grafana_db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres_admin_pwd
+    ports:
+      - "5432:5432"
+    networks:
+      - back-tier
+    volumes:
+      - ./grafana_db_config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - back-tier
+      - front-tier
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana_config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./grafana_config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./dashboards:/opt/grafana/dashboards
+    #environment:
+    #  - GF_INSTALL_PLUGINS=grafana-image-renderer
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+
+networks:
+  front-tier:
+  back-tier:

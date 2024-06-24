@@ -1,0 +1,15 @@
+# config file version
+apiVersion: 1
+
+# list of datasources to insert/update
+# available in the database
+datasources:
+  - name: PostgreSQL - Taxi Monitoring Data
+    type: postgres
+    url: grafana_db:5432
+    user: postgres
+    secureJsonData:
+      password: postgres_admin_pwd
+    jsonData:
+      sslmode: 'disable'
+      database: taxi_monitoring
