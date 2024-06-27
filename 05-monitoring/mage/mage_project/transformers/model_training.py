@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 import mlflow
 import mlflow.xgboost
 import xgboost as xgb
+import pickle
 
 if 'transformer' not in globals():
     from mage_ai.data_preparation.decorators import transformer
@@ -83,7 +84,9 @@ def transform(data, *args, **kwargs):
             # Log the model
             mlflow.sklearn.log_model(model, "model")
             
-            print(f"Params: {params}, MSE: {mse}")
+            #print(f"Params: {params}, MSE: {mse}")
+    
+    return data
 
 @test
 def test_output(output, *args) -> None:

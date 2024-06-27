@@ -22,19 +22,36 @@ blocks:
   configuration:
     file_source:
       path: transformers/model_training.py
-  downstream_blocks: []
+  downstream_blocks:
+  - save_reference_data
   executor_config: null
   executor_type: local_python
   has_callback: false
   language: python
   name: model_training
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: transformer
   upstream_blocks:
   - load_training_data
   uuid: model_training
+- all_upstream_blocks_executed: false
+  color: null
+  configuration: {}
+  downstream_blocks: []
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: save_reference_data
+  retry_config: null
+  status: updated
+  timeout: null
+  type: data_exporter
+  upstream_blocks:
+  - model_training
+  uuid: save_reference_data
 cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
