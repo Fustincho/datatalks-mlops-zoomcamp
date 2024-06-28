@@ -1,0 +1,18 @@
+services:
+  batch-processing:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "8080:8080"
+    environment:
+      - S3_ENDPOINT_URL=http://localstack-s3:4566/
+      - AWS_ACCESS_KEY_ID=Fustincho
+      - AWS_SECRET_ACCESS_KEY=Was_Here
+    command: tail -f /dev/null
+    depends_on:
+      - localstack-s3
+  localstack-s3:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3

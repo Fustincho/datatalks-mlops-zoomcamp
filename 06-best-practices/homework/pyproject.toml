@@ -1,0 +1,19 @@
+[tool.pylint.messages_control]
+
+disable = [
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-final-newline",
+    "no-value-for-parameter",
+    "invalid-name",
+    "too-many-locals",
+    "duplicate-code"
+]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+multi_line_output = 3
+length_sort = true

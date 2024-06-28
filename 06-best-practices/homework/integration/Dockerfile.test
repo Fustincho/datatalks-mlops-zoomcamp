@@ -1,0 +1,12 @@
+FROM python:3.10.13-slim
+
+WORKDIR /app
+
+COPY Pipfile Pipfile.lock ./
+
+RUN pip install -U pip && pip install pipenv 
+RUN pipenv install --deploy --ignore-pipfile
+
+COPY batch_processing.py helpers.py ./
+COPY integration/test_*.py ./
+COPY model.bin .
