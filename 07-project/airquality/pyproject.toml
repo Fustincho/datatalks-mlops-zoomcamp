@@ -8,6 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
+boto3 = "^1.34.153"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -28,6 +29,10 @@ scikit-learn = "^1.5.1"
 optuna = "^3.6.1"
 seaborn = "^0.13.2"
 mlflow = "^2.14.3"
+evidently = "0.4.28"
+psycopg = {version = "3.1.19", extras = ["binary"]}
+fastapi = "^0.111.1"
+uvicorn = "^0.30.4"
 
 [build-system]
 requires = ["poetry-core"]
