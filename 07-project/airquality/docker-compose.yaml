@@ -1,0 +1,69 @@
+services:
+  magedb:
+    image: postgres:14.5-alpine
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: magedb_password
+    volumes:
+      - ./mage/magedb_config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mage:
+    command: mage start mage
+    build:
+      context: .
+      dockerfile: mage.Dockerfile
+    environment:
+      USER_CODE_PATH: /home/src/mage
+      ENV: ${ENV:-development}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    ports:
+      - 6789:6789
+    volumes:
+      - ./mage:/home/src/mage
+    env_file:
+      - .env
+    restart: on-failure:5
+    depends_on:
+      - magedb
+
+  localstack:
+    image: localstack/localstack
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "4566:4566"
+
+  mlflowdb:
+    image: postgres:14.5-alpine
+    environment:
+      POSTGRES_USER: mlflow_user
+      POSTGRES_PASSWORD: mlflow_password
+      POSTGRES_DB: mlflow_db
+    ports:
+      - "5432:5432"
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: mlflow.Dockerfile
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      MLFLOW_S3_ENDPOINT_URL: http://localstack:4566
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mlflowdb
+      - localstack
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
