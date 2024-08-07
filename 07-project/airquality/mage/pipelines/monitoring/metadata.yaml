@@ -1,0 +1,114 @@
+blocks:
+- all_upstream_blocks_executed: true
+  color: null
+  configuration: {}
+  downstream_blocks:
+  - evidently_report
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: load_reference_current
+  retry_config: null
+  status: updated
+  timeout: null
+  type: data_loader
+  upstream_blocks: []
+  uuid: load_reference_current
+- all_upstream_blocks_executed: false
+  color: pink
+  configuration:
+    file_path: custom/evidently_report.py
+    file_source:
+      path: custom/evidently_report.py
+  downstream_blocks:
+  - update_training_data
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: evidently_report
+  retry_config: null
+  status: updated
+  timeout: null
+  type: custom
+  upstream_blocks:
+  - load_reference_current
+  uuid: evidently_report
+- all_upstream_blocks_executed: false
+  color: null
+  configuration: {}
+  downstream_blocks:
+  - trigger_model_training
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: update_training_data
+  retry_config: null
+  status: updated
+  timeout: null
+  type: data_exporter
+  upstream_blocks:
+  - evidently_report
+  uuid: update_training_data
+- all_upstream_blocks_executed: false
+  color: teal
+  configuration:
+    file_source:
+      path: custom/trigger_model_training.py
+  downstream_blocks: []
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: trigger_model_training
+  retry_config: null
+  status: updated
+  timeout: null
+  type: custom
+  upstream_blocks:
+  - update_training_data
+  uuid: trigger_model_training
+cache_block_output_in_memory: false
+callbacks: []
+concurrency_config: {}
+conditionals:
+- all_upstream_blocks_executed: false
+  color: null
+  configuration: {}
+  downstream_blocks: []
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: python
+  name: dataset_drift
+  retry_config: null
+  status: updated
+  timeout: null
+  type: conditional
+  upstream_blocks:
+  - update_training_data
+  uuid: dataset_drift
+created_at: '2024-08-03 23:24:14.173581+00:00'
+data_integration: null
+description: null
+executor_config: {}
+executor_count: 1
+executor_type: null
+extensions: {}
+name: monitoring
+notification_config: {}
+remote_variables_dir: null
+retry_config: {}
+run_pipeline_in_one_process: false
+settings:
+  triggers: null
+spark_config: {}
+tags: []
+type: python
+uuid: monitoring
+variables:
+  experiment_name: retraining
+variables_dir: /home/src/mage_data/mage
+widgets: []
