@@ -8,7 +8,7 @@ if 'test' not in globals():
 
 @transformer
 def transform(dataset, *args, **kwargs):
-     """
+    """
     Transforms the dataset by removing rows with NaN values in the 'sid_35606' column
     and filtering out rows based on z-score thresholds.
 

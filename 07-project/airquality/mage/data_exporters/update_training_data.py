@@ -15,8 +15,7 @@ def export_data(data, *args, **kwargs):
     This function converts the 'datetime' column to datetime format and ensures that 
     all other columns are of type float. It then connects to a PostgreSQL database 
     using connection parameters from environment variables and updates the data 
-    into the 'raw_training_data' table. If a row with the same 'datetime' already exists,
-    it updates the existing row with new data; otherwise, it inserts a new row.
+    into the 'raw_training_data' table.
 
     Parameters:
     df (pandas.DataFrame): The DataFrame to be exported. It is expected to have a 
@@ -32,6 +31,7 @@ def export_data(data, *args, **kwargs):
     The function updates data in the 'raw_training_data' table row by row and prints 
     the number of rows affected at the end of the process.
     """
+    df = data[0]
     df['datetime'] = pd.to_datetime(df['datetime'])
     for col in df.columns[1:]:
         df[col] = df[col].astype(float)
@@ -52,18 +52,6 @@ def export_data(data, *args, **kwargs):
         insert_update_query = """
         INSERT INTO raw_training_data (datetime, sid_20466, sid_34845, sid_34841, sid_35394, sid_35577, sid_35843, sid_36047, sid_36066, sid_36064, sid_36092, sid_35606) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (datetime) DO UPDATE SET
-            sid_20466 = EXCLUDED.sid_20466,
-            sid_34845 = EXCLUDED.sid_34845,
-            sid_34841 = EXCLUDED.sid_34841,
-            sid_35394 = EXCLUDED.sid_35394,
-            sid_35577 = EXCLUDED.sid_35577,
-            sid_35843 = EXCLUDED.sid_35843,
-            sid_36047 = EXCLUDED.sid_36047,
-            sid_36066 = EXCLUDED.sid_36066,
-            sid_36064 = EXCLUDED.sid_36064,
-            sid_36092 = EXCLUDED.sid_36092,
-            sid_35606 = EXCLUDED.sid_35606
         """
 
         for i, row in df.iterrows():

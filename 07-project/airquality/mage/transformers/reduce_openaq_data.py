@@ -36,7 +36,7 @@ def transform(data, *args, **kwargs):
     for sensor_df in data:
         # The reduce output block returns a list of lists of returns. 
         # (In this case, a lists of lists with the dataframe)
-        dfs.append(sensor_df[0])
+        dfs.append(sensor_df)
     concatenated_df = pd.concat(dfs, ignore_index=True)
 
     pivot_df = concatenated_df.pivot(index='datetime', columns='sensor_id', values='value').reset_index()

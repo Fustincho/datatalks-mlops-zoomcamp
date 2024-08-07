@@ -10,12 +10,12 @@ blocks:
   language: python
   name: load_reference_current
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: load_reference_current
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: pink
   configuration:
     file_path: custom/evidently_report.py
@@ -29,13 +29,13 @@ blocks:
   language: python
   name: evidently_report
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: custom
   upstream_blocks:
   - load_reference_current
   uuid: evidently_report
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks:
@@ -46,13 +46,13 @@ blocks:
   language: python
   name: update_training_data
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: data_exporter
   upstream_blocks:
   - evidently_report
   uuid: update_training_data
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: teal
   configuration:
     file_source:
@@ -64,7 +64,7 @@ blocks:
   language: python
   name: trigger_model_training
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: custom
   upstream_blocks:
@@ -74,7 +74,7 @@ cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
 conditionals:
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration: {}
   downstream_blocks: []

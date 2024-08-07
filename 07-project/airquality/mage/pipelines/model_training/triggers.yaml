@@ -1,0 +1,15 @@
+triggers:
+- description: null
+  envs: []
+  last_enabled_at: 2024-08-08 19:39:51.326321
+  name: api_trigger_training
+  pipeline_uuid: model_training
+  schedule_interval: null
+  schedule_type: api
+  settings: null
+  sla: null
+  start_time: 2024-08-08 19:39:00
+  status: active
+  token: 61a8842835644709bcbfeefbf91c93c0
+  variables:
+    experiment_name: initial_training

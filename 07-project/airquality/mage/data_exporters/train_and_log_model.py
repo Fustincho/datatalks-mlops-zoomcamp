@@ -85,12 +85,12 @@ def export_data(dataset, *args, **kwargs):
     with open(imputer_path, "wb") as f:
         pickle.dump(imputer, f)
 
-    MLFLOW_HOST = os.environ("MLFLOW_HOST")
+    MLFLOW_HOST = os.environ["MLFLOW_HOST"]
     mlflow.set_tracking_uri(f"http://{MLFLOW_HOST}:5000")
 
-    experiment_name = kwargs['experiment_name']
     current_datetime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    mlflow.set_experiment(f'{experiment_name}_{current_datetime}')
+    experiment_name = f'{kwargs["experiment_name"]}_{current_datetime}'
+    mlflow.set_experiment(experiment_name)
 
     dtrain = xgb.DMatrix(X_imputed, label=y)
 
@@ -180,7 +180,7 @@ def export_data(dataset, *args, **kwargs):
     model_name = "openaq-medellin-35606-xgboost-imputer"
     
     # List all registered models
-    registered_models = [model.name for model in client.list_registered_models()]
+    registered_models = [model.name for model in client.search_registered_models()]
 
     # Check if the model already exists
     if model_name not in registered_models:
