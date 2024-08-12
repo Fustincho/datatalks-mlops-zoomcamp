@@ -1,0 +1,39 @@
+name: Terraform S3 Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.1
+
+      - name: Initialize Terraform
+        working-directory: ./infra
+        run: terraform init
+
+      - name: Plan Terraform
+        working-directory: ./infra
+        run: terraform plan
+
+      - name: Apply Terraform
+        working-directory: ./infra
+        run: terraform apply -auto-approve
+
