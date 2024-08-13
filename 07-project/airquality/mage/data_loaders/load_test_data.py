@@ -23,8 +23,6 @@ def load_data(*args, **kwargs):
         pandas.DataFrame: A DataFrame containing the pivoted sensor data.
     """
     headers = {"accept": "application/json", "X-API-Key": os.environ['OPENAQ_API_KEY']}
-    
-    base_url = "https://api.openaq.org/v3/"
 
     x_sensors = [20466, 34845, 34841, 35394, 35577, 35843, 36047, 36066, 36064, 36092]
 

@@ -1,11 +1,9 @@
 import os
 import psycopg
 import pandas as pd
-from pandas import DataFrame
 
 if 'data_exporter' not in globals():
     from mage_ai.data_preparation.decorators import data_exporter
-
 
 @data_exporter
 def export_data(data, *args, **kwargs):
@@ -60,6 +58,6 @@ def export_data(data, *args, **kwargs):
                 row['sid_35843'], row['sid_36047'], row['sid_36066'], row['sid_36064'], row['sid_36092'], row['sid_35606']
             ))
         
-        cur.execute(f"SELECT COUNT(*) FROM raw_training_data")
+        cur.execute("SELECT COUNT(*) FROM raw_training_data")
         row_count = cur.fetchone()[0]
         print(f"Number of rows: {row_count}")

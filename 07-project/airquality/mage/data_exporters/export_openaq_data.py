@@ -81,6 +81,6 @@ def export_data_to_postgres(df: DataFrame, **kwargs) -> None:
                 row['sid_35843'], row['sid_36047'], row['sid_36066'], row['sid_36064'], row['sid_36092'], row['sid_35606']
             ))
         
-        cur.execute(f"SELECT COUNT(*) FROM raw_training_data")
+        cur.execute("SELECT COUNT(*) FROM raw_training_data")
         row_count = cur.fetchone()[0]
         print(f"Number of rows: {row_count}")

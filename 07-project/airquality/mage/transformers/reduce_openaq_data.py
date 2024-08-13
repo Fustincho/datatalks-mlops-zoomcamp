@@ -1,5 +1,4 @@
 import pandas as pd
-from datetime import datetime, timezone
 
 if 'transformer' not in globals():
     from mage_ai.data_preparation.decorators import transformer
@@ -23,15 +22,6 @@ def transform(data, *args, **kwargs):
     pd.DataFrame: A pivoted DataFrame with datetime as the index and each sensor's
                   data as separate columns. Sensor cols are prefixed with 'sid_'.
     """
-    start_date = datetime(
-        int(kwargs['y_start']), int(kwargs['m_start']), int(kwargs['d_start']),
-        tzinfo=timezone.utc
-    )
-    end_date = datetime(
-        int(kwargs['y_end']), int(kwargs['m_end']), int(kwargs['d_end']),
-        tzinfo=timezone.utc
-    )
-
     dfs = []
     for sensor_df in data:
         # The reduce output block returns a list of lists of returns. 

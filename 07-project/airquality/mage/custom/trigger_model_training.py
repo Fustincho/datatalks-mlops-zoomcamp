@@ -2,8 +2,6 @@ import requests
 
 if 'custom' not in globals():
     from mage_ai.data_preparation.decorators import custom
-if 'test' not in globals():
-    from mage_ai.data_preparation.decorators import test
 
 @custom
 def transform_custom(*args, **kwargs):
@@ -26,4 +24,4 @@ def transform_custom(*args, **kwargs):
         }
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    requests.post(url, headers=headers, json=data)

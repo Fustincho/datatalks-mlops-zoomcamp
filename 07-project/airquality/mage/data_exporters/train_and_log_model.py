@@ -2,8 +2,6 @@
 import os
 # Utility Functions and Miscellaneous
 import datetime
-from scipy import stats
-from functools import reduce
 # Machine Learning
 import xgboost as xgb
 # Data Preprocessing
@@ -174,8 +172,6 @@ def export_data(dataset, *args, **kwargs):
     runs = client.search_runs(experiment_ids=experiment_id, order_by=["metrics.rmse"], max_results=1)
 
     best_run = runs[0].to_dictionary()
-    # Fetch the best hyperparameters
-    best_hyperparameters = best_run['data']['params']
 
     model_name = "openaq-medellin-35606-xgboost-imputer"
     

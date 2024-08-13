@@ -2,16 +2,12 @@ from evidently import ColumnMapping
 from evidently.report import Report
 
 from evidently.metrics import (
-    DatasetDriftMetric,
-    ColumnDriftMetric
+    DatasetDriftMetric
 )
 
-import pandas as pd
 
 if 'custom' not in globals():
     from mage_ai.data_preparation.decorators import custom
-if 'test' not in globals():
-    from mage_ai.data_preparation.decorators import test
 
 x_sensors_colnames = [
         "sid_20466",

@@ -1,6 +1,5 @@
 import os
 import psycopg
-import pandas as pd
 
 if 'data_exporter' not in globals():
     from mage_ai.data_preparation.decorators import data_exporter
@@ -50,7 +49,7 @@ def export_data(data, *args, **kwargs):
 
     with psycopg.connect(**conn_params) as conn:
             
-        insert_query = f"""
+        insert_query = """
         INSERT INTO aq_predictions (
             datetime, sid_20466, sid_34841, sid_34845, sid_35394, sid_35577, 
             sid_35606, sid_35843, sid_36047, sid_36064, sid_36066, sid_36092, predictions
