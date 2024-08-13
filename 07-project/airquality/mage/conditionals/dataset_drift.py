@@ -1,4 +1,4 @@
-if 'condition' not in globals():
+if "condition" not in globals():
     from mage_ai.data_preparation.decorators import condition
 
 

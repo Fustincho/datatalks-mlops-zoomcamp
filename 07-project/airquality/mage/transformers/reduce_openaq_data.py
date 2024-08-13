@@ -1,8 +1,8 @@
 import pandas as pd
 
-if 'transformer' not in globals():
+if "transformer" not in globals():
     from mage_ai.data_preparation.decorators import transformer
-if 'test' not in globals():
+if "test" not in globals():
     from mage_ai.data_preparation.decorators import test
 
 
@@ -24,17 +24,22 @@ def transform(data, *args, **kwargs):
     """
     dfs = []
     for sensor_df in data:
-        # The reduce output block returns a list of lists of returns. 
+        # The reduce output block returns a list of lists of returns.
         # (In this case, a lists of lists with the dataframe)
         dfs.append(sensor_df)
     concatenated_df = pd.concat(dfs, ignore_index=True)
 
-    pivot_df = concatenated_df.pivot(index='datetime', columns='sensor_id', values='value').reset_index()
+    pivot_df = concatenated_df.pivot(
+        index="datetime", columns="sensor_id", values="value"
+    ).reset_index()
     pivot_df = pivot_df.rename_axis(None, axis=1)
-    pivot_df.columns = [f'sid_{col}' if isinstance(col, int) else col for col in pivot_df.columns[:]]
+    pivot_df.columns = [
+        f"sid_{col}" if isinstance(col, int) else col for col in pivot_df.columns[:]
+    ]
 
     return pivot_df
 
+
 @test
 def test_output(output, *args) -> None:
-    assert output is not None, 'The output is undefined'
+    assert output is not None, "The output is undefined"

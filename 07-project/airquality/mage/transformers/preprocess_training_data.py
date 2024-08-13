@@ -1,10 +1,11 @@
 from scipy import stats
 from functools import reduce
 
-if 'transformer' not in globals():
+if "transformer" not in globals():
     from mage_ai.data_preparation.decorators import transformer
-if 'test' not in globals():
+if "test" not in globals():
     from mage_ai.data_preparation.decorators import test
+
 
 @transformer
 def transform(dataset, *args, **kwargs):
@@ -42,4 +43,4 @@ def transform(dataset, *args, **kwargs):
 
 @test
 def test_output(output, *args) -> None:
-    assert output is not None, 'The output is undefined'
+    assert output is not None, "The output is undefined"

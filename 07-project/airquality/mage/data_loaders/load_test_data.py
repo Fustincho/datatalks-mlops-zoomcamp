@@ -8,9 +8,9 @@ from dateutil.relativedelta import relativedelta
 
 import urllib.parse
 
-if 'data_loader' not in globals():
+if "data_loader" not in globals():
     from mage_ai.data_preparation.decorators import data_loader
-if 'test' not in globals():
+if "test" not in globals():
     from mage_ai.data_preparation.decorators import test
 
 
@@ -22,7 +22,7 @@ def load_data(*args, **kwargs):
     Returns:
         pandas.DataFrame: A DataFrame containing the pivoted sensor data.
     """
-    headers = {"accept": "application/json", "X-API-Key": os.environ['OPENAQ_API_KEY']}
+    headers = {"accept": "application/json", "X-API-Key": os.environ["OPENAQ_API_KEY"]}
 
     x_sensors = [20466, 34845, 34841, 35394, 35577, 35843, 36047, 36066, 36064, 36092]
 
@@ -32,7 +32,6 @@ def load_data(*args, **kwargs):
 
     start_date = datetime(2024, 7, 1, tzinfo=timezone.utc)
     end_date = datetime(2024, 7, 31, tzinfo=timezone.utc)
-
 
     def generate_url(sensor_id, start, end, limit=1000):
         base_url = f"https://api.openaq.org/v3/sensors/{sensor_id}/measurements"
@@ -50,9 +49,7 @@ def load_data(*args, **kwargs):
 
         return full_url
 
-
     all_data = []
-
 
     def fetch_sensor_data(sensor_id):
         sensor_data = []
@@ -68,17 +65,17 @@ def load_data(*args, **kwargs):
                 # print(url)
 
                 if response.status_code == 429:
-                    #print("Rate limit exceeded, sleeping for 30 seconds...")
+                    # print("Rate limit exceeded, sleeping for 30 seconds...")
                     time.sleep(30)
                     continue
 
                 if response.status_code == 403:
-                    #print("Error 403", sensor_id)
+                    # print("Error 403", sensor_id)
                     time.sleep(30)
                     continue
 
                 if response.status_code == 408:
-                    #print("Error 408", sensor_id)
+                    # print("Error 408", sensor_id)
                     time.sleep(30)
                     continue
 
@@ -95,12 +92,15 @@ def load_data(*args, **kwargs):
                     value = item["value"]
                     utc_datetime = item["period"]["datetimeFrom"]["utc"]
                     sensor_data.append(
-                        {"sensor_id": sensor_id, "datetime": utc_datetime, "value": value}
+                        {
+                            "sensor_id": sensor_id,
+                            "datetime": utc_datetime,
+                            "value": value,
+                        }
                     )
                 break
 
         return sensor_data
-
 
     # Iterate over all sensors and fetch data
     for sensor_id in sensor_ids:
@@ -111,13 +111,17 @@ def load_data(*args, **kwargs):
 
     df.to_csv("inference_data.csv", index=False)
 
-    pivot_df = df.pivot(index='datetime', columns='sensor_id', values='value').reset_index()
+    pivot_df = df.pivot(
+        index="datetime", columns="sensor_id", values="value"
+    ).reset_index()
     pivot_df = pivot_df.rename_axis(None, axis=1)
-    pivot_df.columns = [f'sid_{col}' if isinstance(col, int) else col for col in pivot_df.columns[:]]
+    pivot_df.columns = [
+        f"sid_{col}" if isinstance(col, int) else col for col in pivot_df.columns[:]
+    ]
 
     return pivot_df
 
 
 @test
 def test_output(output, *args) -> None:
-    assert output is not None, 'The output is undefined'
+    assert output is not None, "The output is undefined"

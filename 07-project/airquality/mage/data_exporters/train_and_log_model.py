@@ -1,27 +1,35 @@
 # Data Retrieval and Handling
 import os
+
 # Utility Functions and Miscellaneous
 import datetime
+
 # Machine Learning
 import xgboost as xgb
+
 # Data Preprocessing
 from sklearn.impute import KNNImputer
+
 # Hyperparameter Optimization
 import optuna
+
 # Experiment Tracking and Model Management
 import mlflow
 import mlflow.pyfunc
 from mlflow import MlflowClient
+
 # Saving and Loading Models
 import pickle
 
-if 'data_exporter' not in globals():
+if "data_exporter" not in globals():
     from mage_ai.data_preparation.decorators import data_exporter
+
 
 class ImputerAndXGBoost(mlflow.pyfunc.PythonModel):
     """
     A custom MLflow model that combines a KNN imputer and an XGBoost model.
     """
+
     def load_context(self, context):
         """
         Loads the KNN imputer and XGBoost model from artifacts.
@@ -30,7 +38,7 @@ class ImputerAndXGBoost(mlflow.pyfunc.PythonModel):
             self.imputer = pickle.load(f)
         self.xgboost_model = xgb.Booster()
         self.xgboost_model.load_model(context.artifacts["xgboost_model"])
-        
+
     def predict(self, context, model_input):
         """
         Imputes missing values and makes predictions using the XGBoost model.
@@ -95,7 +103,9 @@ def export_data(dataset, *args, **kwargs):
     def objective(trial):
         param = {
             "verbosity": 0,
-            "booster": trial.suggest_categorical("booster", ["gbtree", "gblinear", "dart"]),
+            "booster": trial.suggest_categorical(
+                "booster", ["gbtree", "gblinear", "dart"]
+            ),
             "validate_parameters": True,
             "objective": "reg:squarederror",
             "tree_method": "auto",
@@ -112,17 +122,23 @@ def export_data(dataset, *args, **kwargs):
             param["max_depth"] = trial.suggest_int("max_depth", 3, 9, step=2)
             param["min_child_weight"] = trial.suggest_int("min_child_weight", 2, 10)
             param["gamma"] = trial.suggest_float("gamma", 1e-8, 1.0, log=True)
-            param["grow_policy"] = trial.suggest_categorical("grow_policy", ["depthwise", "lossguide"])
+            param["grow_policy"] = trial.suggest_categorical(
+                "grow_policy", ["depthwise", "lossguide"]
+            )
 
         if param["booster"] == "dart":
-            param["sample_type"] = trial.suggest_categorical("sample_type", ["uniform", "weighted"])
-            param["normalize_type"] = trial.suggest_categorical("normalize_type", ["tree", "forest"])
+            param["sample_type"] = trial.suggest_categorical(
+                "sample_type", ["uniform", "weighted"]
+            )
+            param["normalize_type"] = trial.suggest_categorical(
+                "normalize_type", ["tree", "forest"]
+            )
             param["rate_drop"] = trial.suggest_float("rate_drop", 1e-8, 1.0, log=True)
             param["skip_drop"] = trial.suggest_float("skip_drop", 1e-8, 1.0, log=True)
-        
+
         with mlflow.start_run():
             mlflow.log_params(param)
-            
+
             # Cross-validation
             cv_results = xgb.cv(
                 dtrain=dtrain,
@@ -130,13 +146,13 @@ def export_data(dataset, *args, **kwargs):
                 nfold=5,  # Number of folds
                 num_boost_round=200,  # Maximum number of boosting rounds
                 early_stopping_rounds=10,  # Stop if no improvement after these rounds
-                metrics='rmse',  # Metric to evaluate
-                seed=1020
+                metrics="rmse",  # Metric to evaluate
+                seed=1020,
             )
-            
-            best_rmse = cv_results['test-rmse-mean'].min()
-            best_rounds = cv_results['test-rmse-mean'].idxmin()
-            
+
+            best_rmse = cv_results["test-rmse-mean"].min()
+            best_rounds = cv_results["test-rmse-mean"].idxmin()
+
             mlflow.log_metric("best_rmse", best_rmse)
             mlflow.log_metric("best_rounds", best_rounds)
 
@@ -152,7 +168,7 @@ def export_data(dataset, *args, **kwargs):
                 artifacts={
                     "imputer": imputer_path,
                     "xgboost_model": xgboost_model_path,
-                }
+                },
             )
 
         return best_rmse
@@ -169,12 +185,14 @@ def export_data(dataset, *args, **kwargs):
 
     experiment_id = experiment.experiment_id
 
-    runs = client.search_runs(experiment_ids=experiment_id, order_by=["metrics.rmse"], max_results=1)
+    runs = client.search_runs(
+        experiment_ids=experiment_id, order_by=["metrics.rmse"], max_results=1
+    )
 
     best_run = runs[0].to_dictionary()
 
     model_name = "openaq-medellin-35606-xgboost-imputer"
-    
+
     # List all registered models
     registered_models = [model.name for model in client.search_registered_models()]
 
@@ -193,9 +211,11 @@ def export_data(dataset, *args, **kwargs):
     result = client.create_model_version(
         name=model_name,
         # on log_model we set artifact_path="model"
-        source=f"s3://{s3_bucket_name}/{best_run['info']['experiment_id']}/{best_run['info']['run_id']}/artifacts/model", 
-        run_id=best_run['info']['run_id'],
+        source=f"s3://{s3_bucket_name}/{best_run['info']['experiment_id']}/{best_run['info']['run_id']}/artifacts/model",
+        run_id=best_run["info"]["run_id"],
     )
 
     client.set_registered_model_alias(model_name, "champion", result.version)
-    client.set_model_version_tag(model_name, result.version, "validation_status", "approved")
+    client.set_model_version_tag(
+        model_name, result.version, "validation_status", "approved"
+    )

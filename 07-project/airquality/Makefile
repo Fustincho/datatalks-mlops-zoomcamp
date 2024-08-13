@@ -9,3 +9,8 @@ lint:
 .PHONY: fix
 fix:
 	$(RUFF) check --fix
+
+# Format the files
+.PHONY: format
+format:
+	$(RUFF) format

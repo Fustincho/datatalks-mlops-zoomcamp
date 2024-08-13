@@ -1,18 +1,21 @@
 # System and OS operations
 import os
 import time
+
 # Date and Time operations
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
+
 # Data manipulation and HTTP requests
 import pandas as pd
 import requests
 import urllib.parse
 
-if 'data_loader' not in globals():
+if "data_loader" not in globals():
     from mage_ai.data_preparation.decorators import data_loader
-if 'test' not in globals():
+if "test" not in globals():
     from mage_ai.data_preparation.decorators import test
+
 
 def generate_url(sensor_id, start, end, limit=1000):
     """
@@ -42,12 +45,13 @@ def generate_url(sensor_id, start, end, limit=1000):
 
     return full_url
 
+
 def fetch_sensor_data(sensor_id, start_date, end_date, headers):
     """
     Fetches sensor data from the OpenAQ API for a given sensor within a specified date range.
 
     This function calls the OpenAQ API to retrieve sensor data for the sensor with the given
-    sensor_id. It requests data iteratively, one month at a time, handling rate limits and 
+    sensor_id. It requests data iteratively, one month at a time, handling rate limits and
     other potential errors appropriately.
 
     Parameters:
@@ -110,8 +114,8 @@ def fetch_sensor_data(sensor_id, start_date, end_date, headers):
                 )
             break
 
-    
     return pd.DataFrame(sensor_data)
+
 
 @data_loader
 def load_data_from_api(data, *args, **kwargs):
@@ -130,19 +134,23 @@ def load_data_from_api(data, *args, **kwargs):
     """
 
     start_date = datetime(
-        int(kwargs['y_start']), int(kwargs['m_start']), int(kwargs['d_start']),
-        tzinfo=timezone.utc
+        int(kwargs["y_start"]),
+        int(kwargs["m_start"]),
+        int(kwargs["d_start"]),
+        tzinfo=timezone.utc,
     )
     end_date = datetime(
-        int(kwargs['y_end']), int(kwargs['m_end']), int(kwargs['d_end']),
-        tzinfo=timezone.utc
+        int(kwargs["y_end"]),
+        int(kwargs["m_end"]),
+        int(kwargs["d_end"]),
+        tzinfo=timezone.utc,
     )
 
-    headers = {"accept": "application/json", "X-API-Key": os.environ['OPENAQ_API_KEY']}
-    
-    return fetch_sensor_data(data['sensor_id'], start_date, end_date, headers)
+    headers = {"accept": "application/json", "X-API-Key": os.environ["OPENAQ_API_KEY"]}
+
+    return fetch_sensor_data(data["sensor_id"], start_date, end_date, headers)
 
 
 @test
 def test_output(output, *args) -> None:
-    assert output is not None, 'The output is undefined'
+    assert output is not None, "The output is undefined"
