@@ -20,10 +20,10 @@ output "default_vpc_sg_name" {
   value       = aws_security_group.default_vpc.name
 }
 
-# output "mlflow_repository_url" {
-#   value = module.ecr.mlflow_repository_url
-# }
+output "mlflow_repository_url" {
+  value = module.ecr.mlflow_repository_url
+}
 
-# output "mage_repository_url" {
-#   value = module.ecr.mage_repository_url
-# }
+output "mage_repository_url" {
+  value = module.ecr.mage_repository_url
+}

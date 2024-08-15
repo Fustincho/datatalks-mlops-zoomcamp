@@ -13,9 +13,9 @@ module "vpc" {
   project_prefix = var.project_prefix
 }
 
-# module "ecr" {
-#   source = "./ecr"
-# }
+module "ecr" {
+  source = "./ecr"
+}
 
 terraform {
   backend "s3" {
