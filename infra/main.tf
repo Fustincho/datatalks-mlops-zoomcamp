@@ -3,8 +3,19 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "example_bucket" {
-  bucket = "fustincho-tf-gha-test"  
+  bucket = "${var.project_prefix}-bucket"  
 }
+
+module "vpc" {
+  source = "./vpc"
+
+  # Pass the variable to the sub-module
+  project_prefix = var.project_prefix
+}
+
+# module "ecr" {
+#   source = "./ecr"
+# }
 
 terraform {
   backend "s3" {
