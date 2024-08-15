@@ -9,12 +9,13 @@ resource "aws_s3_bucket" "example_bucket" {
 module "vpc" {
   source = "./vpc"
 
-  # Pass the variable to the sub-module
-  project_prefix = var.project_prefix
+  project_prefix = var.project_prefix  # Pass the variable to the sub-module
 }
 
 module "ecr" {
   source = "./ecr"
+
+  project_prefix = var.project_prefix
 }
 
 terraform {
