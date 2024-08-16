@@ -27,3 +27,8 @@ output "mlflow_repository_url" {
 output "mage_repository_url" {
   value = module.ecr.mage_repository_url
 }
+
+output "mlflow_bucket_address" {
+  value = "s3://${aws_s3_bucket.mlflow_bucket.bucket}"
+}
+
