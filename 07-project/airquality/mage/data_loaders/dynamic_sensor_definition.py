@@ -1,8 +1,29 @@
+import os
+import psycopg
 from typing import Dict, List
 
 if "data_loader" not in globals():
     from mage_ai.data_preparation.decorators import data_loader
 
+def create_aq_database():
+    conn_params = {
+            "host": os.environ["MAGEDB_HOST"],
+            "port": os.environ["MAGEDB_PORT"],
+            "dbname": os.environ["MAGEDB_NAME"],
+            "user": os.environ["MAGEDB_USER"],
+            "password": os.environ["MAGEDB_PASSWORD"],
+        }
+
+    with psycopg.connect(**conn_params) as conn:
+        conn.autocommit = True
+        cur = conn.cursor()
+        # Check if the database exists
+        cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", ('aq_data',))
+        exists = cur.fetchone()
+
+        # If the database does not exist, create it
+        if not exists:
+            cur.execute('CREATE DATABASE aq_data')
 
 @data_loader
 def load_data(*args, **kwargs) -> List[List[Dict]]:
@@ -13,6 +34,8 @@ def load_data(*args, **kwargs) -> List[List[Dict]]:
     dynamic block output so that data is fetched in parallel by
     the dynamic childs.
     """
+
+    create_aq_database()
 
     sensor_ids = [
         20466,

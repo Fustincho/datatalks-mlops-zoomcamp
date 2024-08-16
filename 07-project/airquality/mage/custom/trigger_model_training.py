@@ -10,7 +10,7 @@ def transform_custom(*args, **kwargs):
     Trigger the model_training pipeline
     """
 
-    url = "http://localhost:6789/api/pipeline_schedules/2/api_trigger"
+    url = "http://localhost:6789/api/pipeline_schedules/1/api_trigger"
 
     headers = {
         "Content-Type": "application/json",

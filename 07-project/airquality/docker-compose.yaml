@@ -12,7 +12,7 @@ services:
   mage:
     command: mage start mage
     build:
-      context: .
+      context: ./mage
       dockerfile: mage.Dockerfile
     environment:
       USER_CODE_PATH: /home/src/mage
@@ -49,8 +49,8 @@ services:
 
   mlflow:
     build:
-      context: .
-      dockerfile: mlflow.Dockerfile
+      context: ./mlflow
+      dockerfile: local.Dockerfile
     environment:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test

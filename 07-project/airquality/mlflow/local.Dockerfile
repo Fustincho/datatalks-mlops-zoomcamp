@@ -7,8 +7,9 @@ ENV AWS_DEFAULT_REGION us-east-1
 
 WORKDIR $MLFLOW_HOME
 
+COPY requirements.txt .
 # Install MLflow and psycopg2 (for the backend store)
-RUN pip install -U pip && pip install mlflow==2.12.1 psycopg2-binary boto3
+RUN pip install -U pip && pip install -r requirements.txt
 
 # Install AWS CLI (https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 RUN apt-get update && apt-get install -y \
@@ -19,10 +20,10 @@ RUN apt-get update && apt-get install -y \
     && ./aws/install \
     && rm -rf awscliv2.zip aws
 
-COPY mlflow_entrypoint.sh .
+COPY local_entrypoint.sh .
 
-RUN chmod +x mlflow_entrypoint.sh
+RUN chmod +x local_entrypoint.sh
 
 EXPOSE 5000
 
-ENTRYPOINT [ "./mlflow_entrypoint.sh" ]
+ENTRYPOINT [ "./local_entrypoint.sh" ]

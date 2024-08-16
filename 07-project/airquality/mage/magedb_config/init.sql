@@ -1,2 +1,1 @@
-CREATE DATABASE aq_data;
 CREATE DATABASE mage_database;

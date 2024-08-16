@@ -14,12 +14,12 @@ blocks:
   language: python
   name: dynamic_sensor_definition
   retry_config: null
-  status: updated
+  status: failed
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: dynamic_sensor_definition
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     file_path: data_loaders/load_openaq_data.py
@@ -40,7 +40,7 @@ blocks:
   upstream_blocks:
   - dynamic_sensor_definition
   uuid: load_openaq_data
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     file_path: transformers/reduce_openaq_data.py
