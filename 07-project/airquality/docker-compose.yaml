@@ -23,7 +23,7 @@ services:
     volumes:
       - ./mage:/home/src/mage
     env_file:
-      - .env
+      - local.env
     restart: on-failure:5
     depends_on:
       - magedb
