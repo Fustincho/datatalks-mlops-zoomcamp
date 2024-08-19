@@ -3,11 +3,30 @@ name: Terraform S3 Deployment
 on:
   push:
     branches:
-      - main
+      - cicd
+    paths:
+      - '07-project/airquality/infra/*'
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_api_host: ${{ secrets.TF_VAR_API_HOST }}
+      TF_VAR_magedb_host: ${{ secrets.TF_VAR_MAGEDB_HOST }}
+      TF_VAR_magedb_name: ${{ secrets.TF_VAR_MAGEDB_NAME }}
+      TF_VAR_magedb_password: ${{ secrets.TF_VAR_MAGEDB_PASSWORD }}
+      TF_VAR_magedb_port: ${{ secrets.TF_VAR_MAGEDB_PORT }}
+      TF_VAR_magedb_user: ${{ secrets.TF_VAR_MAGEDB_USER }}
+      TF_VAR_mage_database_connection_url: ${{ secrets.TF_VAR_MAGE_DATABASE_CONNECTION_URL }}
+      TF_VAR_mage_rds_password: ${{ secrets.TF_VAR_MAGE_RDS_PASSWORD }}
+      TF_VAR_mage_rds_username: ${{ secrets.TF_VAR_MAGE_RDS_USERNAME }}
+      TF_VAR_mlflow_host: ${{ secrets.TF_VAR_MLFLOW_HOST }}
+      TF_VAR_mlflow_rds_password: ${{ secrets.TF_VAR_MLFLOW_RDS_PASSWORD }}
+      TF_VAR_mlflow_rds_username: ${{ secrets.TF_VAR_MLFLOW_RDS_USERNAME }}
+      TF_VAR_openaq_api_key: ${{ secrets.TF_VAR_OPENAQ_API_KEY }}
+      TF_VAR_project_prefix: ${{ secrets.TF_VAR_PROJECT_PREFIX }}
+
 
     steps:
       - name: Checkout code
@@ -18,22 +37,67 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.1
 
-      - name: Initialize Terraform
-        working-directory: ./infra
-        run: terraform init
+      - name: Terraform Init
+        working-directory: ./07-project/airquality/infra
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_BACKEND_BUCKET }}" \
+            -backend-config="key=${{ secrets.TF_BACKEND_KEY }}" \
+            -backend-config="region=${{ secrets.TF_BACKEND_REGION }}" \
+            -backend-config="encrypt=true"
 
       - name: Plan Terraform
-        working-directory: ./infra
+        working-directory: ./07-project/airquality/infra
         run: terraform plan
 
       - name: Apply Terraform
-        working-directory: ./infra
+        working-directory: ./07-project/airquality/infra
         run: terraform apply -auto-approve
-
+      
+      - name: Capture Terraform Outputs
+        working-directory: ./07-project/airquality/infra
+        id: capture_outputs
+        run: |
+          echo "MAGE_DB_HOST=$(terraform output -raw mage_db_host)" >> $GITHUB_ENV
+          echo "SECRET_ID=$(terraform output -raw secret_id)" >> $GITHUB_ENV
+  
+      - name: Fetch current secrets from AWS Secrets Manager
+        working-directory: ./07-project/airquality/infra
+        id: fetch_secrets
+        run: |
+          current_secrets=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --query SecretString --output text)
+          echo "current_secrets=$current_secrets" >> $GITHUB_ENV
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
+      - name: Update secrets with the new DB Host and Connection URL
+        working-directory: ./07-project/airquality/infra
+        id: update_secrets
+        run: |
+          magedb_name=$(echo $current_secrets | jq -r '.magedb_name')
+          magedb_user=$(echo $current_secrets | jq -r '.magedb_user')
+          magedb_password=$(echo $current_secrets | jq -r '.magedb_password')
+  
+          mage_database_connection_url="postgresql://$magedb_user:$magedb_password@$MAGE_DB_HOST/$magedb_name"
+  
+          # Create updated secret with new host and connection URL
+          new_secrets=$(echo $current_secrets | jq --arg new_host "$MAGE_DB_HOST" --arg new_url "$mage_database_connection_url" \
+          '.MAGE_DB_HOST = $new_host | .MAGE_DATABASE_CONNECTION_URL = $new_url')
+  
+          echo "new_secrets=$new_secrets" >> $GITHUB_ENV
+  
+      - name: Store updated secrets back to AWS Secrets Manager
+        working-directory: ./07-project/airquality/infra
+        run: |
+          aws secretsmanager put-secret-value --secret-id $SECRET_ID --secret-string "$new_secrets"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

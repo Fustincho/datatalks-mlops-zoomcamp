@@ -18,3 +18,8 @@ variable "public_subnet_ids" {}
 variable "mage_ai_sg_id" {}
 
 variable "mlflow_sg_id" {}
+
+variable "secret_arn" {
+  description = "ARN of the Secrets Manager secret"
+  type        = string
+}

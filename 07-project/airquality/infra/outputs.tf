@@ -32,3 +32,10 @@ output "mlflow_bucket_address" {
   value = "s3://${aws_s3_bucket.mlflow_bucket.bucket}"
 }
 
+output "mage_db_host" {
+  value = module.rds.mage_db_host
+}
+
+output "secret_id" {
+  value = module.sm.secret_id
+}
