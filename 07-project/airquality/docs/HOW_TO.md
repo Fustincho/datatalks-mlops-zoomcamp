@@ -5,6 +5,23 @@ NOTE: make sure you are running these commands in the root folder of the project
 
 For more information about MAGE pipelines go [here](./MAGE_PIPELINES.md)
 
+## 0. Install the dependencies
+
+You can install the necessary dependencies to test locally using Poetry by running:
+
+```bash
+poetry install
+poetry install --with dev
+```
+
+Alternatively, you can create a virtual environment and install the dependencies listed in the `requirements.txt` file by running:
+
+```bash
+python -m venv env
+source env/bin/activate  # On Windows use `env\Scripts\activate`
+pip install -r requirements.txt
+```
+
 ## 1. Setting Up the Project Infrastructure
 
 The project infrastructure is managed through Docker, and the services are defined in the `docker-compose.yaml` file. To get started:
