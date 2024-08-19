@@ -6,6 +6,22 @@ resource "aws_s3_bucket" "mlflow_bucket" {
   bucket = "${var.project_prefix}-bucket"  
 }
 
+module "sm" {
+  source = "./sm"
+
+  project_prefix               = var.project_prefix
+  magedb_host                  = var.magedb_host
+  mage_database_connection_url = var.mage_database_connection_url
+  mlflow_host                  = var.mlflow_host
+  api_host                     = var.api_host
+  openaq_api_key               = var.openaq_api_key
+  magedb_port                  = var.magedb_port
+  magedb_name                  = var.magedb_name
+  magedb_user                  = var.magedb_user
+  magedb_password              = var.magedb_password
+  s3_bucket_name               = aws_s3_bucket.mlflow_bucket.bucket
+}
+
 module "vpc" {
   source = "./vpc"
 
@@ -29,6 +45,8 @@ module "ecs" {
   public_subnet_ids = module.vpc.public_subnet_ids
   mage_ai_sg_id = aws_security_group.mage_ai_sg.id
   mlflow_sg_id = aws_security_group.mlflow_sg.id
+
+  secret_arn = module.sm.secret_arn
 }
 
 module "rds" {
@@ -46,11 +64,11 @@ module "rds" {
   mage_rds_password = var.mage_rds_password
 }
 
-terraform {
-  backend "s3" {
-    bucket         = "fustincho-infra"
-    key            = "bucket_test/terraform.tfstate"  # Path to the state file in the bucket
-    region         = "us-east-1"                  
-    encrypt        = true                             # Optional: Encrypt the state file at rest
-  }
-}
+# terraform {
+#   backend "s3" {
+#     bucket         = "fustincho-infra"
+#     key            = "mlops-zoomcamp/terraform.tfstate"  # Path to the state file in the bucket
+#     region         = "us-east-1"                  
+#     encrypt        = true                             # Optional: Encrypt the state file at rest
+#   }
+# }
