@@ -64,11 +64,11 @@ module "rds" {
   mage_rds_password = var.mage_rds_password
 }
 
-# terraform {
-#   backend "s3" {
-#     bucket         = "fustincho-infra"
-#     key            = "mlops-zoomcamp/terraform.tfstate"  # Path to the state file in the bucket
-#     region         = "us-east-1"                  
-#     encrypt        = true                             # Optional: Encrypt the state file at rest
-#   }
-# }
+terraform {
+  backend "s3" {
+    bucket         = "fustincho-infra"
+    key            = "mlops-zoomcamp/terraform.tfstate"  # Path to the state file in the bucket
+    region         = "us-east-1"                  
+    encrypt        = true                             # Optional: Encrypt the state file at rest
+  }
+}

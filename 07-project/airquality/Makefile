@@ -1,4 +1,5 @@
 RUFF = poetry run ruff
+PYTEST = poetry run pytest
 
 # Check for issues without fixing
 .PHONY: lint
@@ -14,3 +15,7 @@ fix:
 .PHONY: format
 format:
 	$(RUFF) format
+
+.PHONY: test
+test:
+	$(PYTEST) -v
