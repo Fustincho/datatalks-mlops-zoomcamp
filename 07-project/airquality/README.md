@@ -13,6 +13,10 @@ This project can be run:
 
 ![](./docs/images/architecture.png)
 
+## Proof of concept
+
+[This notebook](./notebooks/01_proof_of_concept.ipynb) is a great starting point for exploring this project. It provides comprehensive details on the objectives, data, exploratory data analysis (EDA), and model training that were completed.
+
 ## Objectives
 
 1. **Data Collection**: Utilize air quality data from OpenAQ, specifically focusing on sensors located in Medellin.
