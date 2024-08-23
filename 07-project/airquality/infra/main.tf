@@ -66,9 +66,10 @@ module "rds" {
 
 terraform {
   backend "s3" {
-    bucket         = "fustincho-infra"
-    key            = "mlops-zoomcamp/terraform.tfstate"  # Path to the state file in the bucket
-    region         = "us-east-1"                  
-    encrypt        = true                             # Optional: Encrypt the state file at rest
+    # These values will be overridden by the -backend-config flags
+    bucket = "dummy"
+    key    = "dummy"  # Path to the state file in the bucket
+    region = "dummy"
+    encrypt = "dummy" # Optional: Encrypt the state file at rest
   }
 }

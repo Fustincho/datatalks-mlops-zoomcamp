@@ -39,3 +39,7 @@ output "mage_db_host" {
 output "secret_id" {
   value = module.sm.secret_id
 }
+
+output "secret_name" {
+  value = module.sm.secret_name
+}

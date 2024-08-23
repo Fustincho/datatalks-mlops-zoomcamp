@@ -1,11 +1,14 @@
-name: Terraform S3 Deployment
+name: Air Quality Project Infrastructure Deployment
 
-on:
-  push:
-    branches:
-      - cicd
-    paths:
-      - '07-project/airquality/infra/*'
+on: 
+  workflow_dispatch:
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - '07-project/airquality/infra/*'
 
 jobs:
   terraform:
@@ -59,4 +62,34 @@ jobs:
 
       - name: Apply Terraform
         working-directory: ./07-project/airquality/infra
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve
+          echo "MAGE_DB_HOST=$(terraform output -raw mage_db_host)" >> $GITHUB_ENV
+          echo "SECRET_NAME=$(terraform output -raw secret_name)" >> $GITHUB_ENV
+
+      - name: Fetch current secrets from AWS Secrets Manager
+        id: fetch_secrets
+        run: |
+          current_secrets=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+          echo "current_secrets=$current_secrets" >> $GITHUB_ENV
+
+      - name: Update secrets with the new DB Host and Connection URL
+        id: update_secrets
+        run: |
+          magedb_name=$(echo $current_secrets | jq -r '.MAGEDB_NAME')
+          magedb_user=$(echo $current_secrets | jq -r '.MAGEDB_USER')
+          magedb_password=$(echo $current_secrets | jq -r '.MAGEDB_PASSWORD')
+  
+          mage_database_connection_url="postgresql://$magedb_user:$magedb_password@$MAGE_DB_HOST/$magedb_name"
+  
+          # Create updated secret with new host and connection URL
+          new_secrets=$(echo $current_secrets | jq --arg new_host "$MAGE_DB_HOST" --arg new_url "$mage_database_connection_url" \
+          '.MAGE_DB_HOST = $new_host | .MAGE_DATABASE_CONNECTION_URL = $new_url')
+  
+          #echo "new_secrets=$new_secrets" >> $GITHUB_ENV
+          echo "new_secrets=$(echo "$new_secrets" | jq -c)" >> $GITHUB_ENV
+
+
+      - name: Store updated secrets back to AWS Secrets Manager
+        run: |
+          aws secretsmanager put-secret-value --secret-id $SECRET_NAME --secret-string "$new_secrets"

@@ -23,6 +23,52 @@ resource "aws_ecs_task_definition" "mage_ecs_task" {
           "hostPort"      = 6789
         }
       ]
+      secrets = [
+        {
+          name      = "API_HOST"
+          valueFrom = "${var.secret_arn}:API_HOST::"
+        },
+        {
+          name      = "MAGEDB_HOST"
+          valueFrom = "${var.secret_arn}:MAGEDB_HOST::"
+        },
+        {
+          name      = "MAGEDB_NAME"
+          valueFrom = "${var.secret_arn}:MAGEDB_NAME::"
+        },
+        {
+          name      = "MAGEDB_PASSWORD"
+          valueFrom = "${var.secret_arn}:MAGEDB_PASSWORD::"
+        },
+        {
+          name      = "MAGEDB_PORT"
+          valueFrom = "${var.secret_arn}:MAGEDB_PORT::"
+        },
+        {
+          name      = "MAGEDB_USER"
+          valueFrom = "${var.secret_arn}:MAGEDB_USER::"
+        },
+        {
+          name      = "MAGE_DATABASE_CONNECTION_URL"
+          valueFrom = "${var.secret_arn}:MAGE_DATABASE_CONNECTION_URL::"
+        },
+        {
+          name      = "MLFLOW_HOST"
+          valueFrom = "${var.secret_arn}:MLFLOW_HOST::"
+        },
+        {
+          name      = "OPENAQ_API_KEY"
+          valueFrom = "${var.secret_arn}:OPENAQ_API_KEY::"
+        },
+        {
+          name      = "S3_BUCKET_NAME"
+          valueFrom = "${var.secret_arn}:S3_BUCKET_NAME::"
+        },
+        {
+          name      = "MAGE_DB_HOST"
+          valueFrom = "${var.secret_arn}:MAGE_DB_HOST::"
+        }
+      ]
     }
   ])
 }

@@ -6,3 +6,8 @@ output "secret_arn" {
 output "secret_id" {
   value = aws_secretsmanager_secret.project_secrets.id
 }
+
+output "secret_name" {
+  value = aws_secretsmanager_secret.project_secrets.name
+  description = "The name of the Secrets Manager secret."
+}
