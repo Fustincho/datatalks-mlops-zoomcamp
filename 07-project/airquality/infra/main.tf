@@ -38,6 +38,7 @@ module "ecs" {
   source = "./ecs"
 
   project_prefix = var.project_prefix
+  api_repository_url = module.ecr.api_repository_url
   mlflow_repository_url = module.ecr.mlflow_repository_url
   mage_repository_url = module.ecr.mage_repository_url
   mlflow_bucket_arn = aws_s3_bucket.mlflow_bucket.arn
@@ -45,6 +46,7 @@ module "ecs" {
   public_subnet_ids = module.vpc.public_subnet_ids
   mage_ai_sg_id = aws_security_group.mage_ai_sg.id
   mlflow_sg_id = aws_security_group.mlflow_sg.id
+  api_sg_id = aws_security_group.api_sg.id
 
   secret_arn = module.sm.secret_arn
 }

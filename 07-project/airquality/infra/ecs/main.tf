@@ -98,6 +98,31 @@ resource "aws_ecs_task_definition" "mlflow_ecs_task" {
   ])
 }
 
+resource "aws_ecs_task_definition" "api_ecs_task" {
+  family                = "${var.project_prefix}-api-task"
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  network_mode = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "1024"
+  memory                   = "2048"
+  container_definitions = jsonencode([
+    {
+      "name"      = "app-container"
+      "image"     = "${join("", [var.api_repository_url, ":latest"])}"
+      "cpu"       = 1024
+      "memory"    = 2048
+      "essential" = true
+      "portMappings" = [
+        {
+          "containerPort" = 8000
+          "hostPort"      = 8000
+        }
+      ]
+    }
+  ])
+}
+
 # Define the ECS Service
 resource "aws_ecs_service" "mage_service" {
   name            = "${var.project_prefix}-mage-service"
@@ -129,6 +154,25 @@ resource "aws_ecs_service" "mlflow_service" {
   network_configuration {
     subnets         = var.public_subnet_ids
     security_groups = [var.mlflow_sg_id]
+    assign_public_ip = true
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+}
+
+resource "aws_ecs_service" "api_service" {
+  name            = "${var.project_prefix}-api-service"
+  cluster         = aws_ecs_cluster.cluster.id
+  task_definition = aws_ecs_task_definition.api_ecs_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  platform_version = "LATEST"
+
+  network_configuration {
+    subnets         = var.public_subnet_ids
+    security_groups = [var.api_sg_id]
     assign_public_ip = true
   }
 

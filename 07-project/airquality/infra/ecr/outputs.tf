@@ -5,3 +5,7 @@ output "mlflow_repository_url" {
 output "mage_repository_url" {
   value = aws_ecr_repository.mage_repository.repository_url
 }
+
+output "api_repository_url" {
+  value = aws_ecr_repository.api_repository.repository_url
+}
