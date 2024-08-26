@@ -40,6 +40,10 @@ output "mage_db_host" {
   value = module.rds.mage_db_host
 }
 
+output "mlflow_db_host" {
+  value = module.rds.mlflow_db_host
+}
+
 output "secret_id" {
   value = module.sm.secret_id
 }

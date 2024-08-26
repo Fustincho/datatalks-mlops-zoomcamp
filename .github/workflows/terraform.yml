@@ -29,6 +29,8 @@ jobs:
       TF_VAR_mlflow_rds_username: ${{ secrets.TF_VAR_MLFLOW_RDS_USERNAME }}
       TF_VAR_openaq_api_key: ${{ secrets.TF_VAR_OPENAQ_API_KEY }}
       TF_VAR_project_prefix: ${{ secrets.TF_VAR_PROJECT_PREFIX }}
+      TF_VAR_mlflowdb_dbname: ${{ secrets.TF_VAR_MLFLOWDB_DBNAME }}
+      TF_VAR_mlflow_tracking_uri: ${{ secrets.TF_VAR_MLFLOW_TRACKING_URI }}
 
 
     steps:
@@ -65,6 +67,7 @@ jobs:
         run: |
           terraform apply -auto-approve
           echo "MAGE_DB_HOST=$(terraform output -raw mage_db_host)" >> $GITHUB_ENV
+          echo "MLFLOW_DB_HOST=$(terraform output -raw mlflow_db_host)" >> $GITHUB_ENV
           echo "SECRET_NAME=$(terraform output -raw secret_name)" >> $GITHUB_ENV
 
       - name: Fetch current secrets from AWS Secrets Manager
@@ -83,8 +86,12 @@ jobs:
           mage_database_connection_url="postgresql://$magedb_user:$magedb_password@$MAGE_DB_HOST/$magedb_name"
   
           # Create updated secret with new host and connection URL
-          new_secrets=$(echo $current_secrets | jq --arg new_host "$MAGE_DB_HOST" --arg new_url "$mage_database_connection_url" \
-          '.MAGE_DB_HOST = $new_host | .MAGE_DATABASE_CONNECTION_URL = $new_url')
+          # TODO: fix MAGEDB_HOST and MAGE_DB_HOST they should be called the same
+          new_secrets=$(echo $current_secrets | \
+          jq --arg new_host "$MAGE_DB_HOST" \
+             --arg new_url "$mage_database_connection_url" \
+             --arg new_mlflow_host "$MLFLOW_DB_HOST" \
+             '.MAGEDB_HOST=$new_host | .MAGE_DATABASE_CONNECTION_URL=$new_url | .MLFLOWDB_ENDPOINT=$new_mlflow_host')
   
           #echo "new_secrets=$new_secrets" >> $GITHUB_ENV
           echo "new_secrets=$(echo "$new_secrets" | jq -c)" >> $GITHUB_ENV

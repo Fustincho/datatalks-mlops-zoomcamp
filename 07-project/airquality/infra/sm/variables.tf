@@ -18,6 +18,11 @@ variable "mlflow_host" {
   type        = string
 }
 
+variable "mlflow_tracking_uri" {
+  description = "Host for MLFlow"
+  type        = string
+}
+
 variable "api_host" {
   description = "Host for the API"
   type        = string
@@ -50,5 +55,21 @@ variable "magedb_password" {
 
 variable "s3_bucket_name" {
   description = "S3 bucket name for MLFlow"
+  type        = string
+}
+
+variable "mlflowdb_user" {
+  type        = string
+}
+
+variable "mlflowdb_password" {
+  type        = string
+}
+
+variable "mlflowdb_endpoint" {
+  type        = string
+}
+
+variable "mlflowdb_dbname" {
   type        = string
 }

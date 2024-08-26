@@ -28,6 +28,11 @@ variable "mlflow_host" {
   type        = string
 }
 
+variable "mlflowdb_dbname" {
+  description = "Database Name for MLflow"
+  type        = string
+}
+
 variable "api_host" {
   description = "Host for the API"
   type        = string
@@ -55,6 +60,10 @@ variable "magedb_user" {
 
 variable "magedb_password" {
   description = "Password for MageDB"
+  type        = string
+}
+
+variable "mlflow_tracking_uri" {
   type        = string
 }
 

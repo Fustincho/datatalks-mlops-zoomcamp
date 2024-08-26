@@ -94,6 +94,28 @@ resource "aws_ecs_task_definition" "mlflow_ecs_task" {
           "hostPort"      = 5000
         }
       ]
+      secrets = [
+        {
+          name      = "MLFLOWDB_USER"
+          valueFrom = "${var.secret_arn}:MLFLOWDB_USER::"
+        },
+        {
+          name      = "MLFLOWDB_PASSWORD"
+          valueFrom = "${var.secret_arn}:MLFLOWDB_PASSWORD::"
+        },
+        {
+          name      = "MLFLOWDB_ENDPOINT"
+          valueFrom = "${var.secret_arn}:MLFLOWDB_ENDPOINT::"
+        },
+        {
+          name      = "MLFLOWDB_DBNAME"
+          valueFrom = "${var.secret_arn}:MLFLOWDB_DBNAME::"
+        },
+        {
+          name      = "MLFLOW_ARTIFACT_ROOT"
+          valueFrom = "${var.secret_arn}:MLFLOW_ARTIFACT_ROOT::"
+        }
+      ]
     }
   ])
 }
@@ -117,6 +139,12 @@ resource "aws_ecs_task_definition" "api_ecs_task" {
         {
           "containerPort" = 8000
           "hostPort"      = 8000
+        }
+      ]
+      secrets = [
+        {
+          name      = "MLFLOW_TRACKING_URI"
+          valueFrom = "${var.secret_arn}:MLFLOW_TRACKING_URI::"
         }
       ]
     }

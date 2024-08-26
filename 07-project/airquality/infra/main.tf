@@ -20,6 +20,11 @@ module "sm" {
   magedb_user                  = var.magedb_user
   magedb_password              = var.magedb_password
   s3_bucket_name               = aws_s3_bucket.mlflow_bucket.bucket
+  mlflowdb_user                = var.mlflow_rds_username
+  mlflowdb_password            = var.mlflow_rds_password
+  mlflowdb_endpoint            = var.mlflow_host
+  mlflowdb_dbname              = var.mlflowdb_dbname
+  mlflow_tracking_uri          = var.mlflow_tracking_uri
 }
 
 module "vpc" {

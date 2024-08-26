@@ -15,5 +15,11 @@ resource "aws_secretsmanager_secret_version" "project_secrets_value" {
   "MAGEDB_USER"                  = var.magedb_user
   "MAGEDB_PASSWORD"              = var.magedb_password
   "S3_BUCKET_NAME"               = var.s3_bucket_name
+  "MLFLOWDB_USER"                = var.mlflowdb_user
+  "MLFLOWDB_PASSWORD"            = var.mlflowdb_password
+  "MLFLOWDB_ENDPOINT"            = var.mlflowdb_endpoint
+  "MLFLOWDB_DBNAME"              = var.mlflowdb_dbname
+  "MLFLOW_ARTIFACT_ROOT"         = "s3://${var.s3_bucket_name}"
+  "MLFLOW_TRACKING_URI"          = var.mlflow_tracking_uri
   })
 }
