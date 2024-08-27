@@ -27,6 +27,15 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Cache Docker layers
+      id: cache-docker-layers
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-mage-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-mage-
+
     - name: Build, tag, and push image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -37,7 +46,14 @@ jobs:
         push: true
         tags: |
           ${{ env.ECR_REGISTRY }}/${{ secrets.MAGE_ECR_REPOSITORY }}:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
         provenance: false
+
+    - name: Remove cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
     - name: Update Amazon ECS service
       run: |
