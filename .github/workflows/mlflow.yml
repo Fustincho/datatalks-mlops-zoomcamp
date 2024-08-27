@@ -106,5 +106,3 @@ jobs:
     - name: Store updated secrets back to AWS Secrets Manager
       run: |
         aws secretsmanager put-secret-value --secret-id $SECRET_NAME --secret-string "$new_secrets"
-
-        

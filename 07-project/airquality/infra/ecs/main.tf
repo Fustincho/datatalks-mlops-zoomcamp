@@ -67,6 +67,10 @@ resource "aws_ecs_task_definition" "mage_ecs_task" {
         {
           name      = "MAGE_DB_HOST"
           valueFrom = "${var.secret_arn}:MAGE_DB_HOST::"
+        },
+        {
+          name      = "MLFLOW_TRACKING_URI"
+          valueFrom = "${var.secret_arn}:MLFLOW_TRACKING_URI::"
         }
       ]
     }
