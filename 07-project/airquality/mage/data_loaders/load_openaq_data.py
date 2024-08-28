@@ -34,8 +34,8 @@ def generate_url(sensor_id, start, end, limit=1000):
 
     params = {
         "period_name": "hour",
-        "date_from": start.isoformat(),
-        "date_to": end.isoformat(),
+        "datetime_from": start.isoformat(),
+        "datetime_to": end.isoformat(),
         "limit": limit,
         "page": "1",
     }
