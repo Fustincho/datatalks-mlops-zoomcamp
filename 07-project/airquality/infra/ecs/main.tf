@@ -8,14 +8,14 @@ resource "aws_ecs_task_definition" "mage_ecs_task" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "1024"
-  memory                   = "2048"
+  cpu                      = "2048"
+  memory                   = "8192"
   container_definitions = jsonencode([
     {
       "name"      = "app-container"
       "image"     = "${join("", [var.mage_repository_url, ":latest"])}"
-      "cpu"       = 1024
-      "memory"    = 2048
+      "cpu"       = 2048
+      "memory"    = 8192
       "essential" = true
       "portMappings" = [
         {
