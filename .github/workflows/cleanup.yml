@@ -1,0 +1,77 @@
+name: Air Quality Project Infrastructure Deletion
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_api_host: ${{ secrets.TF_VAR_API_HOST }}
+      TF_VAR_magedb_host: ${{ secrets.TF_VAR_MAGEDB_HOST }}
+      TF_VAR_magedb_name: ${{ secrets.TF_VAR_MAGEDB_NAME }}
+      TF_VAR_magedb_password: ${{ secrets.TF_VAR_MAGEDB_PASSWORD }}
+      TF_VAR_magedb_port: ${{ secrets.TF_VAR_MAGEDB_PORT }}
+      TF_VAR_magedb_user: ${{ secrets.TF_VAR_MAGEDB_USER }}
+      TF_VAR_mage_database_connection_url: ${{ secrets.TF_VAR_MAGE_DATABASE_CONNECTION_URL }}
+      TF_VAR_mage_rds_password: ${{ secrets.TF_VAR_MAGE_RDS_PASSWORD }}
+      TF_VAR_mage_rds_username: ${{ secrets.TF_VAR_MAGE_RDS_USERNAME }}
+      TF_VAR_mlflow_host: ${{ secrets.TF_VAR_MLFLOW_HOST }}
+      TF_VAR_mlflow_rds_password: ${{ secrets.TF_VAR_MLFLOW_RDS_PASSWORD }}
+      TF_VAR_mlflow_rds_username: ${{ secrets.TF_VAR_MLFLOW_RDS_USERNAME }}
+      TF_VAR_openaq_api_key: ${{ secrets.TF_VAR_OPENAQ_API_KEY }}
+      TF_VAR_project_prefix: ${{ secrets.TF_VAR_PROJECT_PREFIX }}
+      TF_VAR_mlflowdb_dbname: ${{ secrets.TF_VAR_MLFLOWDB_DBNAME }}
+      TF_VAR_mlflow_tracking_uri: ${{ secrets.TF_VAR_MLFLOW_TRACKING_URI }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Delete all images from API ECR Repository
+        run: |
+          image_ids=$(aws ecr list-images --repository-name ${{ secrets.API_ECR_REPOSITORY }} --query 'imageIds[*]' --output json)
+          if [ "$image_ids" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name ${{ secrets.API_ECR_REPOSITORY }} --image-ids "$image_ids"
+          fi
+
+      - name: Delete all images from MAGE ECR Repository
+        run: |
+          image_ids=$(aws ecr list-images --repository-name ${{ secrets.MAGE_ECR_REPOSITORY }} --query 'imageIds[*]' --output json)
+          if [ "$image_ids" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name ${{ secrets.MAGE_ECR_REPOSITORY }} --image-ids "$image_ids"
+          fi
+
+      - name: Delete all images from MLFLOW ECR Repository
+        run: |
+          image_ids=$(aws ecr list-images --repository-name ${{ secrets.MLFLOW_ECR_REPOSITORY }} --query 'imageIds[*]' --output json)
+          if [ "$image_ids" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name ${{ secrets.MLFLOW_ECR_REPOSITORY }} --image-ids "$image_ids"
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.1
+
+      - name: Terraform Init
+        working-directory: ./07-project/airquality/infra
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_BACKEND_BUCKET }}" \
+            -backend-config="key=${{ secrets.TF_BACKEND_KEY }}" \
+            -backend-config="region=${{ secrets.TF_BACKEND_REGION }}" \
+            -backend-config="encrypt=true"
+
+      - name: Destroy Terraform
+        working-directory: ./07-project/airquality/infra
+        run: |
+          terraform destroy -auto-approve

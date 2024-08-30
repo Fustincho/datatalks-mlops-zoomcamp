@@ -3,7 +3,9 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "mlflow_bucket" {
-  bucket = "${var.project_prefix}-bucket"  
+  bucket = "${var.project_prefix}-bucket"
+  
+  force_destroy = true
 }
 
 module "sm" {
