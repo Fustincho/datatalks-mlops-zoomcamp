@@ -1,0 +1,127 @@
+name: Deploy Inference API to ECS
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    env: 
+    # TODO This looks differently in the terraform workflow
+      SECRET_NAME: ${{ secrets.SM_SECRET_NAME }}
+      # This is only here to mask stuff
+      TF_VAR_api_host: ${{ secrets.TF_VAR_API_HOST }}
+      TF_VAR_magedb_host: ${{ secrets.TF_VAR_MAGEDB_HOST }}
+      TF_VAR_magedb_name: ${{ secrets.TF_VAR_MAGEDB_NAME }}
+      TF_VAR_magedb_password: ${{ secrets.TF_VAR_MAGEDB_PASSWORD }}
+      TF_VAR_magedb_port: ${{ secrets.TF_VAR_MAGEDB_PORT }}
+      TF_VAR_magedb_user: ${{ secrets.TF_VAR_MAGEDB_USER }}
+      TF_VAR_mage_database_connection_url: ${{ secrets.TF_VAR_MAGE_DATABASE_CONNECTION_URL }}
+      TF_VAR_mage_rds_password: ${{ secrets.TF_VAR_MAGE_RDS_PASSWORD }}
+      TF_VAR_mage_rds_username: ${{ secrets.TF_VAR_MAGE_RDS_USERNAME }}
+      TF_VAR_mlflow_host: ${{ secrets.TF_VAR_MLFLOW_HOST }}
+      TF_VAR_mlflow_rds_password: ${{ secrets.TF_VAR_MLFLOW_RDS_PASSWORD }}
+      TF_VAR_mlflow_rds_username: ${{ secrets.TF_VAR_MLFLOW_RDS_USERNAME }}
+      TF_VAR_openaq_api_key: ${{ secrets.TF_VAR_OPENAQ_API_KEY }}
+      TF_VAR_project_prefix: ${{ secrets.TF_VAR_PROJECT_PREFIX }}
+      TF_VAR_mlflowdb_dbname: ${{ secrets.TF_VAR_MLFLOWDB_DBNAME }}
+      TF_VAR_mlflow_tracking_uri: ${{ secrets.TF_VAR_MLFLOW_TRACKING_URI }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.AWS_REGION }}
+        mask-aws-account-id: true
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache Docker layers
+      id: cache-docker-layers
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-api-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-api-
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      uses: docker/build-push-action@v6
+      with:
+        context: ./07-project/airquality/inference_api/
+        file: ./07-project/airquality/inference_api/Dockerfile
+        push: true
+        tags: |
+          ${{ env.ECR_REGISTRY }}/${{ secrets.API_ECR_REPOSITORY }}:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+        provenance: false
+
+    - name: Remove cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+    - name: Update Amazon ECS service
+      run: |
+        aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.API_ECS_SERVICE }} --task-definition ${{ secrets.API_ECS_TASK_DEFINITION }} --force-new-deployment
+
+    - name: Wait for service stabilization
+      run: |
+        aws ecs wait services-stable --cluster ${{ secrets.ECS_CLUSTER }} --services ${{ secrets.API_ECS_SERVICE }}
+    
+    - name: Fetch the task ARN
+      id: fetch_task
+      run: |
+        TASK_ARN=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER }} --service-name ${{ secrets.API_ECS_SERVICE }} --query 'taskArns[0]' --output text)
+        echo "TASK_ARN=$TASK_ARN" >> $GITHUB_ENV
+    
+    - name: Fetch the ENI ID
+      id: fetch_eni_id
+      run: |
+        ENI_ID=$(aws ecs describe-tasks --cluster ${{ secrets.ECS_CLUSTER }} --tasks $TASK_ARN --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value' --output text)
+        echo "ENI_ID=$ENI_ID" >> $GITHUB_ENV
+
+    - name: Describe the task and fetch public IP
+      id: fetch_public_ip
+      run: |
+        PUBLIC_IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI_ID --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
+        echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+
+    - name: Fetch current secrets from AWS Secrets Manager
+      id: fetch_secrets
+      run: |
+        current_secrets=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+        echo "current_secrets=$current_secrets" >> $GITHUB_ENV
+
+    - name: Update secrets with the new DB Host and Connection URL
+      id: update_secrets
+      run: |
+        # Create updated secret with new mlflow_host and mlflow_tracking_uri
+        new_secrets=$(echo $current_secrets | \
+        jq --arg new_host "$PUBLIC_IP" \
+           '.API_HOST=$new_host')
+
+        #echo "new_secrets=$new_secrets" >> $GITHUB_ENV
+        echo "new_secrets=$(echo "$new_secrets" | jq -c)" >> $GITHUB_ENV
+
+    - name: Store updated secrets back to AWS Secrets Manager
+      run: |
+        aws secretsmanager put-secret-value --secret-id $SECRET_NAME --secret-string "$new_secrets"
+
+    - name: Update Amazon ECS service for MAGE, so that it fetches the updated secrets
+      run: |
+        aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.MAGE_ECS_SERVICE }} --task-definition ${{ secrets.MAGE_ECS_TASK_DEFINITION }} --force-new-deployment
