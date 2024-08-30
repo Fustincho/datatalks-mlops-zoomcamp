@@ -17,6 +17,16 @@ resource "aws_ecs_task_definition" "mage_ecs_task" {
       "cpu"       = 2048
       "memory"    = 8192
       "essential" = true
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_task_log_group.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "mage"
+        }
+      }
+      
       "portMappings" = [
         {
           "containerPort" = 6789
@@ -88,6 +98,16 @@ resource "aws_ecs_task_definition" "mlflow_ecs_task" {
       "cpu"       = 1024
       "memory"    = 2048
       "essential" = true
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_task_log_group.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "mlflow"
+        }
+      }
+
       "portMappings" = [
         {
           "containerPort" = 5000
@@ -135,6 +155,16 @@ resource "aws_ecs_task_definition" "api_ecs_task" {
       "cpu"       = 1024
       "memory"    = 2048
       "essential" = true
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_task_log_group.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "inference"
+        }
+      }
+
       "portMappings" = [
         {
           "containerPort" = 8000

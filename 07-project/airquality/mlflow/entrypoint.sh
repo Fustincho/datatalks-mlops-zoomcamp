@@ -1,4 +1,4 @@
- #!/bin/sh
+#!/bin/bash
 export BACKEND_STORE_URI="postgresql://${MLFLOWDB_USER}:${MLFLOWDB_PASSWORD}@${MLFLOWDB_ENDPOINT}/${MLFLOWDB_DBNAME}"
 
 echo "Starting MLflow server..."
